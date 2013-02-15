@@ -30,7 +30,14 @@ public class SignListener implements Listener {
             if(azione == Action.RIGHT_CLICK_BLOCK){
             	int tipo = block.getType().getId();
             	if(tipo == 63 || tipo == 68){
-            		player.sendMessage("Hey, stai interagendo con un cartello!");
+            		DataStore D = new DataStore("SignRent.db");
+            		Sign element = D.getRegistered(new Sign(block,null,null));
+            		if(element.exists()){
+            			Player realowner = element.getProprietario();
+            			if(realowner.equals(player)){
+            				realowner.sendMessage("Questa proprietà ti appartiene. ti rimangono "+element.getScadenza());
+            			}
+            		}
             	}
             }
     	}
