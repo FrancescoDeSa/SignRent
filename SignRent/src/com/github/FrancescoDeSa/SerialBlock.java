@@ -21,7 +21,7 @@ public class SerialBlock implements Serializable {
 		world = source.getWorld().getName();
 	}
 
-	boolean talequale(SerialBlock lui){
+	public boolean talequale(SerialBlock lui){
 		if(this.X == lui.getX() && this.Y == lui.getY() && this.Z == lui.getZ() && this.world.equals(lui.getWorld())) return true;
 		else return false;
 	}

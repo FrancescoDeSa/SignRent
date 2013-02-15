@@ -79,9 +79,19 @@ public class Sign implements Serializable {
 	public SerialPlayer getProprietario() {
 		return proprietario;
 	}
+	public void setProprietario(SerialPlayer tizio){
+		this.proprietario = tizio;
+	}
 	
 	public GregorianCalendar getScadenza() {
 		return scadenza;
+	}
+	public void setScadenza(GregorianCalendar data){
+		this.scadenza = data;
+	}
+	public void setScadenza(){
+		this.scadenza = new GregorianCalendar();
+		this.scadenza.add(GregorianCalendar.DAY_OF_MONTH, durata);
 	}
 	
 	private SerialBlock cartello;

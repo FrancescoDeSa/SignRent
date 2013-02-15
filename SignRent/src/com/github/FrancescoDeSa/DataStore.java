@@ -45,15 +45,19 @@ public class DataStore {
 				}
 			}*/
 			FileInputStream instream = new FileInputStream(this.file);
-			ObjectInputStream inread = new ObjectInputStream(instream);
-			Sign letto;
-			cartelli = new ArrayList<Sign>();
-			while((letto=((Sign)inread.readObject()))!=null){
-				cartelli.add(letto);
+			if(instream.available() > 5){
+				ObjectInputStream inread = new ObjectInputStream(instream);
+				plugin.getLogger().info("File non vuoto. Caricamento in corso...");
+				Sign letto;
+				cartelli = new ArrayList<Sign>();
+				while((letto=((Sign)inread.readObject()))!=null && instream.available()>5){
+					cartelli.add(letto);
+				}
+				inread.close();
+				plugin.getLogger().info("Caricamento completato!");
 			}
-			inread.close();
+			else plugin.getLogger().info("File vuoto!");
 		} catch (IOException | ClassNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
@@ -62,12 +66,13 @@ public class DataStore {
 		try {
 			FileOutputStream fout = new FileOutputStream(this.file);
 			ObjectOutputStream oos = new ObjectOutputStream(fout);
+			plugin.getLogger().info("Inizio scrittura su file...");
 			for(Sign cartello : cartelli){
 				oos.writeObject(cartello);
 			}
 			oos.close();
+			plugin.getLogger().info("Scrittura completata!");
 		}catch (IOException e){
-			
 			e.printStackTrace();
 		}
 	}
@@ -84,6 +89,7 @@ public class DataStore {
 		for(Sign elemento : cartelli){
 			if(cartello.sameBlock(elemento)){
 				cartelli.remove(elemento);
+				this.Salva();
 				return;
 			}
 		}

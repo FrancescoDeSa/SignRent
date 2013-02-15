@@ -10,5 +10,11 @@ public class SerialPlayer {
 	public String getName(){
 		return name;
 	}
+	public boolean talequale(SerialPlayer lui){
+		String suonome = lui.getName();
+		String mionome = this.name;
+		if(suonome.equals(mionome))return true;
+		else return false;
+	}
 	private String name;
 }
