@@ -1,28 +1,32 @@
 package com.github.FrancescoDeSa;
 
 //import java.util.ArrayList;
+import java.io.Serializable;
 import java.util.Calendar;
+//import java.util.Map;
 //import java.util.HashMap;
 //import java.util.Map;
 //import java.util.StringTokenizer;
 //import java.util.Date;
 import java.util.GregorianCalendar;
-
-import org.bukkit.block.Block;
 //import org.bukkit.command.Command;
 //import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
+//import org.bukkit.entity.Player;
 
-public class Sign {
+public class Sign implements Serializable {
 	
 	
-	public Sign(Block cartello, int durata, int prezzo){
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	public Sign(SerialBlock cartello, int durata, int prezzo){
 		this.cartello = cartello;
 		this.durata = durata;
 		this.prezzo = prezzo;
 		this.inuso = false;
 	}
-	public Sign(Block cartello){
+	public Sign(SerialBlock cartello){
 		this.cartello = cartello;
 		this.inuso = false;
 	}
@@ -44,12 +48,16 @@ public class Sign {
 		}while (cursor.getTimeInMillis() != endInstant);  
 		return presumedDays;
 	}
-	
 	public boolean exists(){
 		return (cartello!=null);
 	}
-	
-	public Block getCartello() {
+	public boolean sameBlock(Sign elemento){
+		if(this.cartello.talequale(elemento.getCartello())){
+			return true;
+		}
+		else return false;
+	}
+	public SerialBlock getCartello() {
 		return cartello;
 	}
 	
@@ -68,7 +76,7 @@ public class Sign {
 		return prezzo;
 	}
 	
-	public Player getProprietario() {
+	public SerialPlayer getProprietario() {
 		return proprietario;
 	}
 	
@@ -76,12 +84,12 @@ public class Sign {
 		return scadenza;
 	}
 	
-	private Block cartello;
+	private SerialBlock cartello;
 	private int durata;
 
 	private int prezzo;
 	private boolean inuso;
 	
-	private Player proprietario;
+	private SerialPlayer proprietario;
 	private GregorianCalendar scadenza;
 }
