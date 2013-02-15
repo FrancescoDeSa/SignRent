@@ -1,3 +1,4 @@
 name: SignRent
 main: com.github.FrancescoDeSa.SignRent
-version: 0.1
+version: 0.2
+depend: [Vault]

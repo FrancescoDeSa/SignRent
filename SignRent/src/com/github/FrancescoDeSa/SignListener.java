@@ -1,6 +1,8 @@
 package com.github.FrancescoDeSa;
 
 //import org.bukkit.Material;
+import net.milkbowl.vault.economy.EconomyResponse;
+
 import org.bukkit.ChatColor;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -24,7 +26,7 @@ public class SignListener implements Listener {
         String ln0 = event.getLine(0);
         if(ln0.equalsIgnoreCase("||sr||")){
         	//plugin.getLogger().info("Intestazione giusta");
-        	if(giocatore.hasPermission("signrent.sign.place") || true){
+        	if(giocatore.hasPermission("signrent.sign.place")){
             	//plugin.getLogger().info("Permessi ok");
             	String l1 = event.getLine(1);
             	if(!l1.isEmpty()){
@@ -47,7 +49,7 @@ public class SignListener implements Listener {
             	}
             	else giocatore.sendMessage(ChatColor.LIGHT_PURPLE+"Errore: non hai inserito il prezzo");
             }
-        	//else giocatore.sendMessage(ChatColor.LIGHT_PURPLE+"Errore: non hai i permessi per creare cartelli RentSign!");
+        	else giocatore.sendMessage(ChatColor.LIGHT_PURPLE+"Errore: non hai i permessi per creare cartelli SignRent!");
         }
     }
     
@@ -82,15 +84,35 @@ public class SignListener implements Listener {
                     			}
                     		}
                     		else{
-                    			element.setProprietario(serialized);
-                    			element.setInuso(true);
-                    			element.setScadenza();
-                    			player.sendMessage(ChatColor.GREEN+"Congratulazioni! Hai affittato questo lotto!");
-                    			plugin.SignData.Salva();
+                    			if(SignRent.econ.getBalance(serialized.getName()) >= element.getPrezzo()){
+                    				EconomyResponse res = SignRent.econ.withdrawPlayer(serialized.getName(), element.getPrezzo());
+                    				if(res.transactionSuccess()){
+	                        			element.setProprietario(serialized);
+	                        			element.setInuso(true);
+	                        			element.setScadenza();
+	                        			player.sendMessage(ChatColor.GREEN+"Congratulazioni! Hai affittato questo lotto!");
+	                        			plugin.SignData.Salva();
+                    				}
+                    			}
                     		}
                     	}
                     	else if(itemID == 318){//flint
-                    		
+                    		if(element.isInuso()){
+                    			if(realowner.talequale(serialized)){
+                    				if(element.giorniRimasti() < 7){//1 settimana
+                    					if(SignRent.econ.getBalance(serialized.getName()) >= element.getPrezzo()){
+                            				EconomyResponse res = SignRent.econ.withdrawPlayer(serialized.getName(), element.getPrezzo());
+                            				if(res.transactionSuccess()){
+		                    					element.prolunga();
+		                    					player.sendMessage("Affitto prolungato di "+element.getDurata()+" giorni!");
+                            				}
+                    					}
+                    				}
+                    				else{
+                    					player.sendMessage("Spiacente, è troppo presto per rinnovare. Torna una settimana prima della scadenza...");
+                    				}
+                    			}
+                    		}
                     	}
                     	else{
 	            			if(element.isInuso()){
@@ -105,7 +127,6 @@ public class SignListener implements Listener {
 	            				player.sendMessage("Questo lotto è disponibile all'affitto per "+element.getPrezzo()+" ogni "+element.getDurata()+" giorni");
 	            				player.sendMessage(ChatColor.BOLD+"Usa (tasto destro) una stick sul cartello per affittare!");
 	            			}
-                    		
                     	}
             		}
             	}

@@ -57,6 +57,9 @@ public class Sign implements Serializable {
 		}
 		else return false;
 	}
+	public void prolunga(){
+		scadenza.add(GregorianCalendar.DAY_OF_MONTH, this.durata);
+	}
 	public SerialBlock getCartello() {
 		return cartello;
 	}
@@ -89,6 +92,7 @@ public class Sign implements Serializable {
 	public void setScadenza(GregorianCalendar data){
 		this.scadenza = data;
 	}
+
 	public void setScadenza(){
 		this.scadenza = new GregorianCalendar();
 		this.scadenza.add(GregorianCalendar.DAY_OF_MONTH, durata);

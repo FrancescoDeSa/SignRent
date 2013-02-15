@@ -2,16 +2,25 @@ package com.github.FrancescoDeSa;
 
 //import org.bukkit.command.Command;
 import java.io.File;
+import java.util.logging.Logger;
+
+import net.milkbowl.vault.economy.Economy;
 
 import org.bukkit.plugin.PluginManager;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class SignRent extends JavaPlugin{
 	
-	public final SignListener ascoltatore = new SignListener(this);
 	@Override
     public void onEnable(){
-		getLogger().info("onEnable has been invoked!");
+		
+		if (!setupEconomy() ) {
+            log.severe(String.format("[%s] - Disabled due to no Vault dependency found!", getDescription().getName()));
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
+		
 		PluginManager pm = getServer().getPluginManager();
 		pm.registerEvents(ascoltatore, this);
 		
@@ -27,5 +36,19 @@ public final class SignRent extends JavaPlugin{
     	SignData.Salva();
     }
     
+    private boolean setupEconomy() {
+        if (getServer().getPluginManager().getPlugin("Vault") == null) {
+            return false;
+        }
+        RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
+        if (rsp == null) {
+            return false;
+        }
+        econ = rsp.getProvider();
+        return econ != null;
+    }
 	public DataStore SignData;
+	public final SignListener ascoltatore = new SignListener(this);
+	public static Economy econ = null;
+	public Logger log = getLogger();
 }
