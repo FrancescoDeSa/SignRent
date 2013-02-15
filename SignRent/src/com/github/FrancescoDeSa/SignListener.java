@@ -22,30 +22,26 @@ public class SignListener implements Listener {
     @EventHandler
     public void cartelloCambiato(SignChangeEvent event) {
         Player giocatore = event.getPlayer();
-        //String nome = giocatore.getName();
         String ln0 = event.getLine(0);
-        if(ln0.equalsIgnoreCase("||sr||")){
-        	//plugin.getLogger().info("Intestazione giusta");
+        if(ln0.equalsIgnoreCase(plugin.getConfig().getString("sign.tag"))){
         	if(giocatore.hasPermission("signrent.sign.place")){
-            	//plugin.getLogger().info("Permessi ok");
             	String l1 = event.getLine(1);
             	if(!l1.isEmpty()){
             		int prezzo = Integer.parseInt(l1);
-	            	if(prezzo > 0){
-	                	//plugin.getLogger().info("prezzo ok");
+	            	if(prezzo >= plugin.getConfig().getInt("sign.minprice") && prezzo <=plugin.getConfig().getInt("sign.maxprice")){
 	                	String l2 = event.getLine(2);
 	                	if(!l2.isEmpty()){
 		            		int giorni = Integer.parseInt(event.getLine(2));
-		            		if(giorni > 0){
+		            		if(giorni >= plugin.getConfig().getInt("sign.mindays") && giorni <= plugin.getConfig().getInt("sign.maxdays")){
 		                    	//plugin.getLogger().info("giorni ok");
 		            			giocatore.sendMessage(ChatColor.GREEN+"RentSign creato: "+prezzo+" ogni "+giorni+"giorni.");
 		            			plugin.SignData.regSign(new Sign(new SerialBlock(event.getBlock()),giorni,prezzo));
 		            		}
-		            		else giocatore.sendMessage(ChatColor.LIGHT_PURPLE+"Errore: il numero di giorni deve essere positivo");
+		            		else giocatore.sendMessage(ChatColor.LIGHT_PURPLE+"Errore: il numero di giorni non rientra nei limiti");
 	            		}
 	            		else giocatore.sendMessage(ChatColor.LIGHT_PURPLE+"Errore: devi inserire il numero di giorni");
 	            	}
-	            	else giocatore.sendMessage(ChatColor.LIGHT_PURPLE+"Errore: Il prezzo deve essere un numero positivo!");
+	            	else giocatore.sendMessage(ChatColor.LIGHT_PURPLE+"Errore: Il prezzo non rientra nei limiti");
             	}
             	else giocatore.sendMessage(ChatColor.LIGHT_PURPLE+"Errore: non hai inserito il prezzo");
             }
@@ -72,11 +68,11 @@ public class SignListener implements Listener {
             			SerialPlayer serialized = new SerialPlayer(player);
                     	//plugin.getLogger().info("è registrato");
                     	int itemID = event.getItem().getType().getId();
-                    	if(itemID == 280){//stick
+                    	if(itemID == plugin.getConfig().getInt("tools.rent.id")){
                     		if(element.isInuso()){
                     			if(realowner.talequale(serialized)){
                     				player.sendMessage("Questa proprietà ti appartiene gia! ti rimangono ancora "+element.giorniRimasti());
-                    				player.sendMessage("Per rinnovare, usa (click destro) una flint sul cartello!");
+                    				player.sendMessage("Per rinnovare, usa (click destro) "+plugin.getConfig().getString("tool.rent.name")+" sul cartello!");
                     			}
                     			else{
 	                    			player.sendMessage("Spiacente, questo lotto è gia affittato!");
@@ -96,10 +92,10 @@ public class SignListener implements Listener {
                     			}
                     		}
                     	}
-                    	else if(itemID == 318){//flint
+                    	else if(itemID == plugin.getConfig().getInt("tools.renew.id")){//flint
                     		if(element.isInuso()){
                     			if(realowner.talequale(serialized)){
-                    				if(element.giorniRimasti() < 7){//1 settimana
+                    				if(element.giorniRimasti() <= plugin.getConfig().getInt("sign.renewdays")){
                     					if(SignRent.econ.getBalance(serialized.getName()) >= element.getPrezzo()){
                             				EconomyResponse res = SignRent.econ.withdrawPlayer(serialized.getName(), element.getPrezzo());
                             				if(res.transactionSuccess()){
@@ -109,7 +105,8 @@ public class SignListener implements Listener {
                     					}
                     				}
                     				else{
-                    					player.sendMessage("Spiacente, è troppo presto per rinnovare. Torna una settimana prima della scadenza...");
+                    					player.sendMessage("Spiacente, è troppo presto per rinnovare.");
+                    					player.sendMessage("Puoi tornare a "+plugin.getConfig().getInt("sign.renewdays")+" giorni dalla data di scadenza");
                     				}
                     			}
                     		}

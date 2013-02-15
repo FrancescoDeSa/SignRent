@@ -1,0 +1,31 @@
+#SignRent configuration!
+plugin:
+#The file where plugin data is stored into
+	filename: SignRent.dat
+	
+sign:
+#The tag used to start signs
+	tag: ||SR||
+#The min price allowed for a sign
+	minprice: 10
+#The max price allowed for a sign
+	maxprice: 10000
+#The min amount of days a sign can be set to
+	mindays: 10
+#The max amount of days a sign can be set to
+	maxdays: 30
+#How many days must be left to be able to renew
+	renewdays: 7
+	
+tools:
+	rent:
+#the ID of the tool used to rent a sign
+		id: 280
+#the name that appears in chat
+		name: Stick
+	renew: 
+#the ID of the tool used to rent a sign
+		id: 318
+#the name that appears in chat
+		name: Flint
+		

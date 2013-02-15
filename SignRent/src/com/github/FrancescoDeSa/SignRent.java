@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 
 import net.milkbowl.vault.economy.Economy;
 
+//import org.bukkit.configuration.Configuration;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -14,29 +15,26 @@ public final class SignRent extends JavaPlugin{
 	
 	@Override
     public void onEnable(){
+		PluginManager pm = getServer().getPluginManager();
 		
 		if (!setupEconomy() ) {
-            log.severe(String.format("[%s] - Disabled due to no Vault dependency found!", getDescription().getName()));
-            getServer().getPluginManager().disablePlugin(this);
+            log.severe(String.format("[%s] - Vault non Trovato! Plugin disabilitato", getDescription().getName()));
+            pm.disablePlugin(this);
             return;
         }
-		
-		PluginManager pm = getServer().getPluginManager();
 		pm.registerEvents(ascoltatore, this);
-		
 		String pluginFolder = this.getDataFolder().getAbsolutePath();
 		(new File(pluginFolder)).mkdirs();
-		SignData = new DataStore(new File(pluginFolder+File.separator+"SignRent.dat"),this);
+		SignData = new DataStore(new File(pluginFolder+File.separator+this.getConfig().getString("plugin.filename")),this);
 		SignData.Carica();
     }
  
     @Override
-    public void onDisable() {
-    	getLogger().info("onDisable has been invoked!");
+    public void onDisable(){
     	SignData.Salva();
     }
     
-    private boolean setupEconomy() {
+    private boolean setupEconomy(){
         if (getServer().getPluginManager().getPlugin("Vault") == null) {
             return false;
         }
@@ -47,6 +45,7 @@ public final class SignRent extends JavaPlugin{
         econ = rsp.getProvider();
         return econ != null;
     }
+    
 	public DataStore SignData;
 	public final SignListener ascoltatore = new SignListener(this);
 	public static Economy econ = null;
