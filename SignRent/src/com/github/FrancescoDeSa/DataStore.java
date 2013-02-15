@@ -1,7 +1,8 @@
 package com.github.FrancescoDeSa;
 
-//import org.bukkit.block.Block;
-//import org.bukkit.entity.Player;
+/*import java.util.GregorianCalendar;
+import org.bukkit.block.Block;
+import org.bukkit.entity.Player;*/
 import com.db4o.Db4oEmbedded;
 import com.db4o.ObjectContainer;
 import com.db4o.ObjectSet;
@@ -21,10 +22,12 @@ public class DataStore {
 		}
 		else{
 			Sign lui = result.next();
-			return new Sign(lui.getCartello(),lui.getProprietario(),lui.getScadenza());
+			return lui;
 		}
 	}
-
+	public void regSign(Sign dati){
+		db.store(dati);
+	}
 	private EmbeddedConfiguration config;
 	private ObjectContainer db;
 }
