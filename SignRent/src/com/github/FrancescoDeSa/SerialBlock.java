@@ -1,6 +1,7 @@
 package com.github.FrancescoDeSa;
 
 import java.io.Serializable;
+import java.util.StringTokenizer;
 
 import org.bukkit.block.Block;
 
@@ -20,10 +21,26 @@ public class SerialBlock implements Serializable {
 		Z = source.getZ();
 		world = source.getWorld().getName();
 	}
+	public SerialBlock(String world){
+		StringTokenizer st = new StringTokenizer("|");
+		this.X = Integer.parseInt(st.nextToken());
+		this.Y = Integer.parseInt(st.nextToken());
+		this.Z = Integer.parseInt(st.nextToken());
+		this.world = st.nextToken();
+	}
 
-	public boolean talequale(SerialBlock lui){
+	public boolean sameBlock(SerialBlock lui){
 		if(this.X == lui.getX() && this.Y == lui.getY() && this.Z == lui.getZ() && this.world.equals(lui.getWorld())) return true;
 		else return false;
+	}
+	
+	public String toString(){
+		return (
+				this.X+"|"+
+				this.Y+"|"+
+				this.Z+"|"+
+				this.world
+				);
 	}
 	public int getX() {
 		return X;

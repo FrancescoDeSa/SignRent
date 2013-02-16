@@ -20,20 +20,28 @@ public class Sign implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+	public Sign(SerialBlock block, String player, int duration, int price, boolean rented, long expire){
+		this.block = block;
+		this.owner = player;
+		this.duration = duration;
+		this.price = price;
+		this.rented = rented;
+		this.expire = expire;
+	}
 	public Sign(SerialBlock cartello, int durata, int prezzo){
-		this.cartello = cartello;
-		this.durata = durata;
-		this.prezzo = prezzo;
-		this.inuso = false;
+		this.block = cartello;
+		this.duration = durata;
+		this.price = prezzo;
+		this.rented = false;
 	}
 	public Sign(SerialBlock cartello){
-		this.cartello = cartello;
-		this.inuso = false;
+		this.block = cartello;
+		this.rented = false;
 	}
 	public int giorniRimasti(){
 		GregorianCalendar propriomo = new GregorianCalendar();
 		int MILLIS_IN_DAY = 1000 * 60 * 60 * 24;
-		long endInstant = scadenza.getTimeInMillis();
+		long endInstant = expire;
 		int presumedDays = (int) ((endInstant - propriomo.getTimeInMillis()) / MILLIS_IN_DAY);
 		Calendar cursor = (Calendar) propriomo.clone();
 		cursor.add(Calendar.DAY_OF_YEAR, presumedDays);
@@ -49,61 +57,64 @@ public class Sign implements Serializable {
 		return presumedDays;
 	}
 	public boolean exists(){
-		return (cartello!=null);
+		return (block!=null);
 	}
 	public boolean sameBlock(Sign elemento){
-		if(this.cartello.talequale(elemento.getCartello())){
+		if(this.block.sameBlock(elemento.getCartello())){
 			return true;
 		}
 		else return false;
 	}
 	public void prolunga(){
-		scadenza.add(GregorianCalendar.DAY_OF_MONTH, this.durata);
+		GregorianCalendar dum = new GregorianCalendar();
+		dum.add(GregorianCalendar.DAY_OF_MONTH, duration);
+		expire = dum.getTimeInMillis();
 	}
 	public SerialBlock getCartello() {
-		return cartello;
+		return block;
 	}
 	
 	public boolean isInuso() {
-		return inuso;
+		return rented;
 	}
 	public void setInuso(boolean inuso) {
-		this.inuso = inuso;
+		this.rented = inuso;
 	}
 
 	public int getDurata() {
-		return durata;
+		return duration;
 	}
 	
 	public int getPrezzo() {
-		return prezzo;
+		return price;
 	}
 	
-	public SerialPlayer getProprietario() {
-		return proprietario;
+	public String getProprietario() {
+		return owner;
 	}
-	public void setProprietario(SerialPlayer tizio){
-		this.proprietario = tizio;
+	public void setProprietario(String tizio){
+		this.owner = tizio;
 	}
 	
-	public GregorianCalendar getScadenza() {
-		return scadenza;
+	public long getScadenza() {
+		return expire;
 	}
 	public void setScadenza(GregorianCalendar data){
-		this.scadenza = data;
+		this.expire = data.getTimeInMillis();
 	}
 
 	public void setScadenza(){
-		this.scadenza = new GregorianCalendar();
-		this.scadenza.add(GregorianCalendar.DAY_OF_MONTH, durata);
+		GregorianCalendar dum = new GregorianCalendar();
+		dum.add(GregorianCalendar.DAY_OF_MONTH, duration);
+		this.expire = dum.getTimeInMillis();
 	}
 	
-	private SerialBlock cartello;
-	private int durata;
+	private SerialBlock block;
+	private int duration;
 
-	private int prezzo;
-	private boolean inuso;
+	private int price;
+	private boolean rented;
 	
-	private SerialPlayer proprietario;
-	private GregorianCalendar scadenza;
+	private String owner;
+	private long expire;
 }

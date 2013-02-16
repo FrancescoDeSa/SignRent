@@ -1,12 +1,8 @@
 package com.github.FrancescoDeSa;
 
-//import org.bukkit.command.Command;
-import java.io.File;
-import java.util.logging.Logger;
+import java.sql.SQLException;
 
 import net.milkbowl.vault.economy.Economy;
-
-//import org.bukkit.configuration.Configuration;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -16,22 +12,29 @@ public final class SignRent extends JavaPlugin{
 	@Override
     public void onEnable(){
 		PluginManager pm = getServer().getPluginManager();
-		
 		if (!setupEconomy() ) {
             pm.disablePlugin(this);
             return;
         }
+	
+		settings = new Settings(this);
+		if(settings.datasource.equals("database")){
+			try {
+				this.source = new SqliDataSource(this,settings);
+			} catch (ClassNotFoundException | SQLException e) {
+				this.getLogger().severe("Can't initialize database. Disabling plugin...");
+				this.getServer().getPluginManager().disablePlugin(this);
+			}
+		}
+		session = source.load();
 		pm.registerEvents(ascoltatore, this);
-		String pluginFolder = this.getDataFolder().getAbsolutePath();
-		(new File(pluginFolder)).mkdirs();
-		SignData = new DataStore(new File(pluginFolder+File.separator+this.getConfig().getString("plugin.filename")),this);
-		SignData.Carica();
     }
  
     @Override
     public void onDisable(){
-    	SignData.Salva();
+    	session.save();
     }
+    
     
     private boolean setupEconomy(){
         if (getServer().getPluginManager().getPlugin("Vault") == null) {
@@ -44,9 +47,10 @@ public final class SignRent extends JavaPlugin{
         econ = rsp.getProvider();
         return econ != null;
     }
-    
-	public DataStore SignData;
+
+	public SignSession session;
+	public DataSource source;
+	public Settings settings;
 	public final SignListener ascoltatore = new SignListener(this);
 	public static Economy econ = null;
-	public Logger log = getLogger();
 }

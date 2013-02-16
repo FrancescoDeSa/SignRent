@@ -1,11 +1,23 @@
 #SignRent configuration!
 plugin:
+   datasource: database
 #The file where plugin data is stored into
-   filename: SignRent.dat
+   db:
+      table:
+         name:
+         columns:
+            name:
+            location:
+            duration:
+            price:
+            rented:
+            owner:
+            expire:
+      
 
 sign:
 #The tag used to start signs
-   tag: "||SR||"
+   tag: '||SR||'
 #The min price allowed for a sign
    minprice: 10
 #The max price allowed for a sign
