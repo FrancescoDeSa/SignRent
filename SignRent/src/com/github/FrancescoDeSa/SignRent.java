@@ -18,7 +18,6 @@ public final class SignRent extends JavaPlugin{
 		PluginManager pm = getServer().getPluginManager();
 		
 		if (!setupEconomy() ) {
-            log.severe(String.format("[%s] - Vault non Trovato! Plugin disabilitato", getDescription().getName()));
             pm.disablePlugin(this);
             return;
         }

@@ -2,3 +2,23 @@ name: SignRent
 main: com.github.FrancescoDeSa.SignRent
 version: 0.2
 depend: [Vault]
+
+permissions:
+   signrent.*:
+      description: Accesso ad ogni comando
+      children:
+         signrent.sign.place: true
+         signrent.sign.remove: true
+         signrent.sign.use: true
+
+   signrent.sign.place:
+      description: Permesso di piazzare un cartello
+      default: false
+
+   signrent.sign.remove:
+      description: Permesso di eliminare i cartelli
+      default: false
+
+   signrent.sign.use:
+      description: Permesso di usare i cartelli
+      default: true
