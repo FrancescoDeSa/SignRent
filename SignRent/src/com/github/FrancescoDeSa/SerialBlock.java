@@ -21,8 +21,8 @@ public class SerialBlock implements Serializable {
 		Z = source.getZ();
 		world = source.getWorld().getName();
 	}
-	public SerialBlock(String world){
-		StringTokenizer st = new StringTokenizer("|");
+	public SerialBlock(String data){
+		StringTokenizer st = new StringTokenizer(data,"|");
 		this.X = Integer.parseInt(st.nextToken());
 		this.Y = Integer.parseInt(st.nextToken());
 		this.Z = Integer.parseInt(st.nextToken());

@@ -6,7 +6,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-
 import lib.PatPeter.SQLibrary.SQLite;
 
 public class SqliDataSource implements DataSource{
@@ -27,6 +26,7 @@ public class SqliDataSource implements DataSource{
     
 	public SqliDataSource(SignRent plugin, Settings config) throws SQLException, ClassNotFoundException {
 		database = config.getDatabase;
+		//plugin.getLogger().info("IL DB è: "+database);
 		tableName = config.getTableName;
 		columnName = config.getColumnName;
 		columnDuration = config.getColumnDuration;
@@ -34,13 +34,14 @@ public class SqliDataSource implements DataSource{
 		columnPrice = config.getColumnPrice;
 		columnRented = config.getColumnRented;
 		columnExpire = config.getColumnExpire;
-		
+		//plugin.getLogger().info(columnName+", "+columnDuration+", "+columnLocation+", "+columnPrice+", "+columnRented+", "+columnExpire);
+		this.plugin = plugin;
 		connect();
 		setup();
 	}
 	
 	private synchronized void connect() throws ClassNotFoundException, SQLException {
-		sqlite = new SQLite(plugin.getLogger(),plugin.getName(),database,plugin.getDataFolder().getAbsolutePath());
+		sqlite = new SQLite(plugin.getLogger(),plugin.getName(),plugin.getDataFolder().getAbsolutePath(),database);
 		try{
 			sqlite.open();
 		}catch(Exception e){
@@ -55,12 +56,12 @@ public class SqliDataSource implements DataSource{
 			  return;
 		}else{
 			plugin.getLogger().info(tableName+" missing from database. Cration in process...");
-			sqlite.query("CREATE TABLE" + tableName + " ("
+			sqlite.query("CREATE TABLE " + tableName + "("
                     + "id INTEGER AUTO_INCREMENT,"
                     + columnName + " VARCHAR(255),"
-                    + columnDuration + " INT NOT NULL,"
-                    + columnLocation + " VARCHAR(100)"
-                    + columnPrice + " INT NOT NULL,"
+                    + columnDuration + " INTEGER,"
+                    + columnLocation + " VARCHAR(100),"
+                    + columnPrice + " INTEGER,"
                     + columnRented + " BOOLEAN,"
                     + columnExpire + " BIGINT,"
                     + "CONSTRAINT table_const_prim PRIMARY KEY (id));");
@@ -73,9 +74,10 @@ public class SqliDataSource implements DataSource{
 		ResultSet rs = null;
 		ArrayList<Sign> signs = new ArrayList<Sign>();
         try {
-            pst = sqlite.prepare("SELECT * FROM"+tableName);
+            pst = sqlite.prepare("SELECT * FROM "+tableName);
             rs = pst.executeQuery();
             while(rs.next()){
+            	System.out.println("CARICO UNA RIGA!!!");
             	String player = rs.getString(columnName);
             	int duration = rs.getInt(columnDuration);
             	int price = rs.getInt(columnPrice);
@@ -85,8 +87,11 @@ public class SqliDataSource implements DataSource{
             	Sign sign = new Sign(block,player,duration,price,rented,expire);
             	signs.add(sign);
             }
+            plugin.getLogger().info("CARICAMENTO SIGNSESSION COMPLETATO!");
             return new SignSession(signs, this);
         } catch (SQLException ex) {
+        	System.out.println("ERRORE NEL LOAD!!!");
+        	plugin.getLogger().warning(ex.getMessage());
             return null;
         } finally {
         	close(pst);
@@ -100,8 +105,8 @@ public class SqliDataSource implements DataSource{
         try {
             pst = sqlite.prepare(
             		"INSERT INTO "+tableName
-            		+"(" + columnName+","+columnDuration+","+columnLocation+","+columnPrice+","+columnRented+","+columnExpire+")"
-            		+"VALUES (?,?,?,?,?);");
+            		+"(" + columnName+","+columnDuration+","+columnLocation+","+columnPrice+","+columnRented+","+columnExpire+") "
+            		+"VALUES (?,?,?,?,?,?);");
             pst.setString(1, sign.getProprietario());
             pst.setInt(2, sign.getDurata());
             pst.setString(3, sign.getCartello().toString());
@@ -109,7 +114,10 @@ public class SqliDataSource implements DataSource{
             pst.setBoolean(5, sign.isInuso());
             pst.setLong(6, sign.getScadenza());
             pst.executeUpdate();
+            System.out.println("source: SAVE SU DB CON SUCCESSO!!!");
         } catch (SQLException ex) {
+            System.out.println("source: SAVE SU DB FALLITO!!!");
+        	System.out.println(ex.getMessage());
             return false;
         } finally {
         	close(pst);
@@ -117,6 +125,37 @@ public class SqliDataSource implements DataSource{
         return true;
 	}
 
+	public boolean update(Sign sign) {
+		PreparedStatement pst = null;
+        try {
+            pst = sqlite.prepare(
+            		"UPDATE "+tableName
+            		+" SET "
+            		+columnName+"=?,"//1
+            		+columnDuration+"=?,"//2
+            		+columnLocation+"=?,"//3
+            		+columnPrice+"=?,"//4
+            		+columnRented+"=?,"//5
+            		+columnExpire+"=?"//6
+            		+" WHERE "+columnLocation+"=?");//7
+            pst.setString(1, sign.getProprietario());
+            pst.setInt(2, sign.getDurata());
+            pst.setString(3, sign.getCartello().toString());
+            pst.setInt(4, sign.getPrezzo());
+            pst.setBoolean(5, sign.isInuso());
+            pst.setLong(6, sign.getScadenza());
+            pst.setString(7, sign.getCartello().toString());
+            pst.executeUpdate();
+            System.out.println("source: UPDATE SU DB CON SUCCESSO!!!");
+        } catch (SQLException ex) {
+            System.out.println("source: UPDATE SU DB FALLITO!!!");
+        	System.out.println(ex.getMessage());
+            return false;
+        } finally {
+        	close(pst);
+        }
+        return true;
+	}
       
     public synchronized void close() {
         try {
@@ -155,7 +194,23 @@ public class SqliDataSource implements DataSource{
 
 	@Override
 	public boolean delete(Sign sign) {
-		// TODO Auto-generated method stub
-		return false;
+		PreparedStatement pst = null;
+        try {
+            pst = sqlite.prepare(
+            		"DELETE FROM "+tableName
+            		+" WHERE "+columnLocation+"=?");//7
+            pst.setString(1, sign.getCartello().toString());
+            pst.executeUpdate();
+            System.out.println("source: DELETE DAL DB CON SUCCESSO!!!");
+        } catch (SQLException ex) {
+            System.out.println("source: DELETE DAL DB FALLITO!!!");
+        	System.out.println(ex.getMessage());
+            return false;
+        } finally {
+        	close(pst);
+        }
+        return true;
 	}
+
+	
 }

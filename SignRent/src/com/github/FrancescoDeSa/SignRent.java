@@ -1,5 +1,6 @@
 package com.github.FrancescoDeSa;
 
+import java.io.File;
 import java.sql.SQLException;
 
 import net.milkbowl.vault.economy.Economy;
@@ -16,12 +17,14 @@ public final class SignRent extends JavaPlugin{
             pm.disablePlugin(this);
             return;
         }
-	
+		String pluginFolder = this.getDataFolder().getAbsolutePath();
+		(new File(pluginFolder)).mkdirs();
 		settings = new Settings(this);
 		if(settings.datasource.equals("database")){
 			try {
 				this.source = new SqliDataSource(this,settings);
 			} catch (ClassNotFoundException | SQLException e) {
+				this.getLogger().warning(e.getMessage());
 				this.getLogger().severe("Can't initialize database. Disabling plugin...");
 				this.getServer().getPluginManager().disablePlugin(this);
 			}
@@ -32,7 +35,10 @@ public final class SignRent extends JavaPlugin{
  
     @Override
     public void onDisable(){
-    	session.save();
+    	if(session.save()){
+    		System.out.println("Sessione salvata con successo!!!");
+    	}
+    	else System.out.println("ERRORE: IMPOSSIBILE SALVARE LA SESSIONE");
     }
     
     

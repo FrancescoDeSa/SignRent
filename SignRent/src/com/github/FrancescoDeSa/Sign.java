@@ -1,17 +1,8 @@
 package com.github.FrancescoDeSa;
 
-//import java.util.ArrayList;
 import java.io.Serializable;
-import java.util.Calendar;
-//import java.util.Map;
-//import java.util.HashMap;
-//import java.util.Map;
-//import java.util.StringTokenizer;
-//import java.util.Date;
 import java.util.GregorianCalendar;
-//import org.bukkit.command.Command;
-//import org.bukkit.command.CommandSender;
-//import org.bukkit.entity.Player;
+
 
 public class Sign implements Serializable {
 	
@@ -43,17 +34,6 @@ public class Sign implements Serializable {
 		int MILLIS_IN_DAY = 1000 * 60 * 60 * 24;
 		long endInstant = expire;
 		int presumedDays = (int) ((endInstant - propriomo.getTimeInMillis()) / MILLIS_IN_DAY);
-		Calendar cursor = (Calendar) propriomo.clone();
-		cursor.add(Calendar.DAY_OF_YEAR, presumedDays);
-		long instant = cursor.getTimeInMillis();
-		if(instant == endInstant){
-			return presumedDays;  
-		}
-		final int step = instant < endInstant ? 1 : -1;  
-		do{
-			cursor.add(Calendar.DAY_OF_MONTH, step);  
-			presumedDays += step;
-		}while (cursor.getTimeInMillis() != endInstant);  
 		return presumedDays;
 	}
 	public boolean exists(){
@@ -70,6 +50,10 @@ public class Sign implements Serializable {
 		dum.add(GregorianCalendar.DAY_OF_MONTH, duration);
 		expire = dum.getTimeInMillis();
 	}
+	
+	public String toString(){
+		return("BLOCCO: "+this.block.toString()+" PROPRIETARIO: "+this.owner);
+	}
 	public SerialBlock getCartello() {
 		return block;
 	}
@@ -84,9 +68,15 @@ public class Sign implements Serializable {
 	public int getDurata() {
 		return duration;
 	}
+	public void setDurata(int duration){
+		this.duration = duration;
+	}
 	
 	public int getPrezzo() {
 		return price;
+	}
+	public void setPrezzo(int price){
+		this.price = price;
 	}
 	
 	public String getProprietario() {
@@ -102,11 +92,13 @@ public class Sign implements Serializable {
 	public void setScadenza(GregorianCalendar data){
 		this.expire = data.getTimeInMillis();
 	}
-
 	public void setScadenza(){
 		GregorianCalendar dum = new GregorianCalendar();
 		dum.add(GregorianCalendar.DAY_OF_MONTH, duration);
 		this.expire = dum.getTimeInMillis();
+	}
+	public void setScadenza(long expire){
+		this.expire = expire;
 	}
 	
 	private SerialBlock block;

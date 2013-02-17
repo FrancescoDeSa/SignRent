@@ -1,8 +1,6 @@
 package com.github.FrancescoDeSa;
 
-//import org.bukkit.Material;
 import net.milkbowl.vault.economy.EconomyResponse;
-
 import org.bukkit.ChatColor;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -12,30 +10,45 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-//import org.bukkit.inventory.ItemStack;
 
 public class SignListener implements Listener {
 
+	String signTag, rentName,renewName;
+	int minPrice, maxPrice, minDays, maxDays, rentId, renewId, renewDays;
+	
 	public SignListener(SignRent plugin){
 		this.plugin = plugin;
+		this.signTag = plugin.settings.getSignTag;
+		this.rentName = plugin.settings.getRentToolName;
+		this.rentId = plugin.settings.getRentToolId;
+		this.renewId = plugin.settings.getRenewToolId;
+		this.renewName = plugin.settings.getRenewToolName;
+		this.maxDays = plugin.settings.getMaxDays;
+		this.minDays = plugin.settings.getMinDays;
+		this.minPrice = plugin.settings.getMinPrice;
+		this.maxPrice = plugin.settings.getMaxPrice;
+		this.renewDays = plugin.settings.getRenewDays;
 	}
     @EventHandler
     public void cartelloCambiato(SignChangeEvent event) {
         Player giocatore = event.getPlayer();
         String ln0 = event.getLine(0);
-        if(ln0.equalsIgnoreCase(plugin.getConfig().getString("sign.tag"))){
+        if(ln0.equalsIgnoreCase(signTag)){
         	if(giocatore.hasPermission("signrent.sign.place")){
             	String l1 = event.getLine(1);
             	if(!l1.isEmpty()){
             		int prezzo = Integer.parseInt(l1);
-	            	if(prezzo >= plugin.getConfig().getInt("sign.minprice") && prezzo <=plugin.getConfig().getInt("sign.maxprice")){
+	            	if(prezzo >= minPrice && prezzo <= maxPrice){
 	                	String l2 = event.getLine(2);
 	                	if(!l2.isEmpty()){
 		            		int giorni = Integer.parseInt(event.getLine(2));
-		            		if(giorni >= plugin.getConfig().getInt("sign.mindays") && giorni <= plugin.getConfig().getInt("sign.maxdays")){
+		            		if(giorni >= minDays && giorni <= maxDays){
 		                    	//plugin.getLogger().info("giorni ok");
-		            			giocatore.sendMessage(ChatColor.GREEN+"RentSign creato: "+prezzo+" ogni "+giorni+"giorni.");
-		            			plugin.session.register(new Sign(new SerialBlock(event.getBlock()),giorni,prezzo));
+		            			SerialBlock dum = new SerialBlock(event.getBlock());
+		            			Sign temp = new Sign(dum,giorni,prezzo);
+		            			if(plugin.session.register(temp)){
+		            				giocatore.sendMessage(ChatColor.GREEN+"RentSign creato: "+SignRent.econ.format(prezzo)+" ogni "+giorni+" giorni.");
+		            			}
 		            		}
 		            		else giocatore.sendMessage(ChatColor.LIGHT_PURPLE+"Errore: il numero di giorni non rientra nei limiti");
 	            		}
@@ -58,31 +71,30 @@ public class SignListener implements Listener {
             if(azione == Action.RIGHT_CLICK_BLOCK){
             	int tipo = block.getType().getId();
             	if(tipo == 63 || tipo == 68){
-                	plugin.getLogger().info("è un cartello");
+                	//plugin.getLogger().info("è un cartello");
                 	SerialBlock dumblock = new SerialBlock(block);
                 	Sign dumsign = new Sign(dumblock);
             		Sign element = plugin.session.getRegistered(dumsign);
             		if(element != null){
-                    	plugin.getLogger().info("è registrato");
+                    	//plugin.getLogger().info("è registrato");
             			String realowner = element.getProprietario();
             			String serialized = player.getName();
             			if(event.hasItem()){
-                        	plugin.getLogger().info("è item");
+                        	//plugin.getLogger().info("è item");
 	                    	int itemID = event.getItem().getType().getId();
-	                    	int mioID = plugin.getConfig().getInt("tools.rent.id");
-	                    	if(itemID == mioID){
-                    			plugin.getLogger().info("Accettato");
+	                    	if(itemID == rentId){
+                    			//plugin.getLogger().info("Accettato");
 	                    		if(element.isInuso()){
-	                    			plugin.getLogger().info("Inuso");
+	                    			//plugin.getLogger().info("Inuso");
 	                    			if(realowner.equals(serialized)){
-		                    			plugin.getLogger().info("Giamia");
-	                    				player.sendMessage("Questa proprietà ti appartiene gia! ti rimangono ancora giorni");
-	                    				player.sendMessage("Per rinnovare, usa (click destro) "+plugin.getConfig().getString("tools.rent.name")+" sul cartello!");
+		                    			//plugin.getLogger().info("Giamia");
+	                    				player.sendMessage("Questa proprietà ti appartiene gia! ti rimangono ancora "+element.giorniRimasti()+" giorni");
+	                    				player.sendMessage("Per rinnovare, usa (click destro) "+renewName+" sul cartello!");
 	                    			}
 	                    			else{
-	                        			plugin.getLogger().info("Nonmia");
+	                        			//plugin.getLogger().info("Nonmia");
 		                    			player.sendMessage("Spiacente, questo lotto è gia affittato!");
-		                    			player.sendMessage("Questa proprietà appartiene a "+element.getProprietario()+". Gli rimangono ancora "+element.giorniRimasti());
+		                    			player.sendMessage("Questa proprietà appartiene a "+element.getProprietario()+". Gli rimangono ancora "+element.giorniRimasti()+" giorni.");
 	                    			}
 	                    		}
 	                    		else{
@@ -92,57 +104,60 @@ public class SignListener implements Listener {
 		                        			element.setProprietario(serialized);
 		                        			element.setInuso(true);
 		                        			element.setScadenza();
+		                        			plugin.session.update(element);
 		                        			player.sendMessage(ChatColor.GREEN+"Congratulazioni! Hai affittato questo lotto!");
 	                    				}
 	                    				else{
 	                    					player.sendMessage(ChatColor.RED+res.errorMessage);
 	                    				}
 	                    			}
+	                    			else player.sendMessage(ChatColor.RED+"Non puoi permetterti questo lotto: costa "+SignRent.econ.format(element.getPrezzo()));
 	                    		}
 	                    	}
-	                    	else if(itemID == plugin.getConfig().getInt("tools.renew.id")){//flint
-	                        	plugin.getLogger().info("è flint");
+	                    	else if(itemID == renewId){//flint
+	                        	//plugin.getLogger().info("è flint");
 	                    		if(element.isInuso()){
-	                            	plugin.getLogger().info("è inuso");
+	                            	//plugin.getLogger().info("è inuso");
 	                    			if(realowner.equals(serialized)){
-	                                	plugin.getLogger().info("sono io");
-	                    				if(element.giorniRimasti() <= plugin.getConfig().getInt("sign.renewdays")){
-	                                    	plugin.getLogger().info("posso rinnovare");
+	                                	//plugin.getLogger().info("sono io");
+	                    				if(element.giorniRimasti() <= renewDays){
+	                                    	//plugin.getLogger().info("posso rinnovare");
 	                    					if(SignRent.econ.getBalance(serialized) >= element.getPrezzo()){
-	                                        	plugin.getLogger().info("ho i soldi");
+	                                        	//plugin.getLogger().info("ho i soldi");
 	                            				EconomyResponse res = SignRent.econ.withdrawPlayer(serialized, element.getPrezzo());
 	                            				if(res.transactionSuccess()){
-	                                            	plugin.getLogger().info("tutto ok");
+	                                            	//plugin.getLogger().info("tutto ok");
 			                    					element.prolunga();
 			                    					player.sendMessage("Affitto prolungato di "+element.getDurata()+" giorni!");
 	                            				}
 	                    					}
+	                    					else player.sendMessage(ChatColor.RED+"Non puoi permetterti di prolungare questo affitto: costa "+SignRent.econ.format(element.getPrezzo()));
 	                    				}
 	                    				else{
-	                                    	plugin.getLogger().info("non posso rinnovare");
+	                                    	//plugin.getLogger().info("non posso rinnovare");
 	                    					player.sendMessage("Spiacente, è troppo presto per rinnovare.");
 	                    					player.sendMessage("Puoi tornare a "+plugin.getConfig().getInt("sign.renewdays")+" giorni dalla data di scadenza");
 	                    				}
 	                    			}
 	                    		}
-	                        	plugin.getLogger().info("vavattenne");
+	                        	//plugin.getLogger().info("vavattenne");
 	                    	}
 	                    	else{
-	                        	plugin.getLogger().info("altro item");
+	                        	//plugin.getLogger().info("altro item");
 		            			if(element.isInuso()){
-		                        	plugin.getLogger().info("è inuso");
+		                        	//plugin.getLogger().info("è inuso");
 		                			if(realowner.equals(serialized)){
-		                            	plugin.getLogger().info("sonoio");
-		                				player.sendMessage("Questa proprietà ti appartiene. ti rimangono ancora "+element.giorniRimasti());
+		                            	//plugin.getLogger().info("sonoio");
+		                				player.sendMessage("Questa proprietà ti appartiene. ti rimangono ancora "+element.giorniRimasti()+" giorni.");
 		                			}
 		                			else if(player.hasPermission("signrent.sign.other.read")){
-		                            	plugin.getLogger().info("nonsonoio");
-		                				player.sendMessage("Questa proprietà appartiene a "+element.getProprietario()+". Gli rimangono ancora "+element.giorniRimasti());
+		                            	//plugin.getLogger().info("nonsonoio");
+		                				player.sendMessage("Questa proprietà appartiene a "+element.getProprietario()+". Gli rimangono ancora "+element.giorniRimasti()+" giorni.");
 		                			}
 		            			}
 		            			else{
-		                        	plugin.getLogger().info("è disponibile");
-		            				player.sendMessage("Questo lotto è disponibile all'affitto per "+element.getPrezzo()+" ogni "+element.getDurata()+" giorni");
+		                        	//plugin.getLogger().info("è disponibile");
+		            				player.sendMessage("Questo lotto è disponibile all'affitto per "+SignRent.econ.format(element.getPrezzo())+" ogni "+element.getDurata()+" giorni");
 		            				player.sendMessage(ChatColor.BOLD+"Usa (tasto destro) una stick sul cartello per affittare!");
 		            			}
 	                    	}
@@ -150,19 +165,19 @@ public class SignListener implements Listener {
                     	else{
                         	plugin.getLogger().info("nienteitem");
 	            			if(element.isInuso()){
-	                        	plugin.getLogger().info(" non è inuso");
+	                        	//plugin.getLogger().info("è inuso");
 	                			if(realowner.equals(serialized)){
-	                            	plugin.getLogger().info("sonoio");
-	                				player.sendMessage("Questa proprietà ti appartiene. ti rimangono ancora "+element.giorniRimasti());
+	                            	//plugin.getLogger().info("sonoio");
+	                				player.sendMessage("Questa proprietà ti appartiene. ti rimangono ancora "+element.giorniRimasti()+ " giorni!");
 	                			}
 	                			else if(player.hasPermission("signrent.sign.other.read")){
-	                            	plugin.getLogger().info("è un altro");
-	                				player.sendMessage("Questa proprietà appartiene a "+element.getProprietario()+". Gli rimangono ancora "+element.giorniRimasti());
+	                            	//plugin.getLogger().info("è un altro");
+	                				player.sendMessage("Questa proprietà appartiene a "+element.getProprietario()+". Gli rimangono ancora "+element.giorniRimasti()+" giorni.");
 	                			}
 	            			}
 	            			else{
-	                        	plugin.getLogger().info("è disponibile");
-	            				player.sendMessage("Questo lotto è disponibile all'affitto per "+element.getPrezzo()+" ogni "+element.getDurata()+" giorni");
+	                        	//plugin.getLogger().info("è disponibile");
+	            				player.sendMessage("Questo lotto è disponibile all'affitto per "+SignRent.econ.format(element.getPrezzo())+" ogni "+element.getDurata()+" giorni");
 	            				player.sendMessage(ChatColor.BOLD+"Usa (tasto destro) una stick sul cartello per affittare!");
 	            			}
                     	}

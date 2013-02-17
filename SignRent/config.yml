@@ -3,16 +3,16 @@ plugin:
    datasource: database
 #The file where plugin data is stored into
    db:
+      database: signdb
       table:
-         name:
+         name: signdb
          columns:
-            name:
-            location:
-            duration:
-            price:
-            rented:
-            owner:
-            expire:
+            name: player
+            location: location
+            duration: duration
+            price: price
+            rented: rented
+            expire: expire
       
 
 sign:

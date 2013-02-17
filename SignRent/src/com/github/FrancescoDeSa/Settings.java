@@ -25,6 +25,7 @@ public class Settings{
 		this.getColumnName = config.getString("plugin.db.table.columns.name");
 		this.getColumnLocation = config.getString("plugin.db.table.columns.location");
 		this.getColumnDuration = config.getString("plugin.db.table.columns.duration");
+		this.getColumnPrice = config.getString("plugin.db.table.columns.price");
 		this.getColumnRented = config.getString("plugin.db.table.columns.rented");
 		this.getColumnExpire = config.getString("plugin.db.table.columns.expire");
 		
