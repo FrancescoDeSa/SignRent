@@ -29,7 +29,9 @@ public final class SignRent extends JavaPlugin{
 				this.getServer().getPluginManager().disablePlugin(this);
 			}
 		}
+		SignScheduler.setPlugin(this);
 		session = source.load();
+		ascoltatore = new SignListener(this);
 		pm.registerEvents(ascoltatore, this);
     }
  
@@ -57,6 +59,6 @@ public final class SignRent extends JavaPlugin{
 	public SignSession session;
 	public DataSource source;
 	public Settings settings;
-	public final SignListener ascoltatore = new SignListener(this);
+	public SignListener ascoltatore;
 	public static Economy econ = null;
 }

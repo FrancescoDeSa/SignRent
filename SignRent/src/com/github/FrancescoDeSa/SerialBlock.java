@@ -1,60 +1,55 @@
 package com.github.FrancescoDeSa;
 
-import java.io.Serializable;
 import java.util.StringTokenizer;
-
+import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 
-public class SerialBlock implements Serializable {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-	private int X;
-	private int Y;
-	private int Z;
-	private String world;
-	
+public class SerialBlock{
+	private Location location;
 	public SerialBlock(Block source){
-		X = source.getX();
-		Y = source.getY();
-		Z = source.getZ();
-		world = source.getWorld().getName();
+		this.location = source.getLocation();
 	}
-	public SerialBlock(String data){
+	public SerialBlock(SignRent plugin, String data){
 		StringTokenizer st = new StringTokenizer(data,"|");
-		this.X = Integer.parseInt(st.nextToken());
-		this.Y = Integer.parseInt(st.nextToken());
-		this.Z = Integer.parseInt(st.nextToken());
-		this.world = st.nextToken();
+		int X = Integer.parseInt(st.nextToken());
+		int Y = Integer.parseInt(st.nextToken());
+		int Z = Integer.parseInt(st.nextToken());
+		String world  = st.nextToken();
+		this.location = new Location(plugin.getServer().getWorld(world),X,Y,Z);
 	}
 
 	public boolean sameBlock(SerialBlock lui){
-		if(this.X == lui.getX() && this.Y == lui.getY() && this.Z == lui.getZ() && this.world.equals(lui.getWorld())) return true;
+		if(this.getX() == lui.getX() && this.getY() == lui.getY() && this.getZ() == lui.getZ() && this.getWorldName().equals(lui.getWorldName())) return true;
 		else return false;
 	}
 	
 	public String toString(){
 		return (
-				this.X+"|"+
-				this.Y+"|"+
-				this.Z+"|"+
-				this.world
+				this.getX()+"|"+
+				this.getY()+"|"+
+				this.getZ()+"|"+
+				this.getWorldName()
 				);
 	}
 	public int getX() {
-		return X;
+		return location.getBlockX();
 	}
 
 	public int getY() {
-		return Y;
+		return location.getBlockY();
 	}
 
 	public int getZ() {
-		return Z;
+		return location.getBlockZ();
 	}
-
-	public String getWorld() {
-		return world;
+	public Location getLocation(){
+		return location;
+	}
+	public String getWorldName() {
+		return location.getWorld().getName();
+	}
+	public World getWorld(){
+		return location.getWorld();
 	}
 }

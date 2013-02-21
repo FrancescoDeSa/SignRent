@@ -72,7 +72,7 @@ public class SqliDataSource implements DataSource{
 	public SignSession load() {
 		PreparedStatement pst = null;
 		ResultSet rs = null;
-		ArrayList<Sign> signs = new ArrayList<Sign>();
+		ArrayList<RSign> signs = new ArrayList<RSign>();
         try {
             pst = sqlite.prepare("SELECT * FROM "+tableName);
             rs = pst.executeQuery();
@@ -83,12 +83,14 @@ public class SqliDataSource implements DataSource{
             	int price = rs.getInt(columnPrice);
             	boolean rented = rs.getBoolean(columnRented);
             	long expire = rs.getLong(columnExpire);
-            	SerialBlock block = new SerialBlock(rs.getString(columnLocation));
-            	Sign sign = new Sign(block,player,duration,price,rented,expire);
+            	SerialBlock block = new SerialBlock(plugin,rs.getString(columnLocation));
+            	RSign sign = new RSign(plugin, block,player,duration,price,rented,expire);
             	signs.add(sign);
             }
             plugin.getLogger().info("CARICAMENTO SIGNSESSION COMPLETATO!");
-            return new SignSession(signs, this);
+            SignSession result = new SignSession(signs, this);
+            result.startScheduler();
+            return result;
         } catch (SQLException ex) {
         	System.out.println("ERRORE NEL LOAD!!!");
         	plugin.getLogger().warning(ex.getMessage());
@@ -100,18 +102,18 @@ public class SqliDataSource implements DataSource{
 	}
 
 	@Override
-	public boolean save(Sign sign){
+	public boolean save(RSign sign){
 		PreparedStatement pst = null;
         try {
             pst = sqlite.prepare(
             		"INSERT INTO "+tableName
             		+"(" + columnName+","+columnDuration+","+columnLocation+","+columnPrice+","+columnRented+","+columnExpire+") "
             		+"VALUES (?,?,?,?,?,?);");
-            pst.setString(1, sign.getProprietario());
-            pst.setInt(2, sign.getDurata());
-            pst.setString(3, sign.getCartello().toString());
-            pst.setInt(4, sign.getPrezzo());
-            pst.setBoolean(5, sign.isInuso());
+            pst.setString(1, sign.getOwner());
+            pst.setInt(2, sign.getDuration());
+            pst.setString(3, sign.getSign().toString());
+            pst.setInt(4, sign.getPrice());
+            pst.setBoolean(5, sign.isRented());
             pst.setLong(6, sign.getScadenza());
             pst.executeUpdate();
             System.out.println("source: SAVE SU DB CON SUCCESSO!!!");
@@ -125,7 +127,7 @@ public class SqliDataSource implements DataSource{
         return true;
 	}
 
-	public boolean update(Sign sign) {
+	public boolean update(RSign sign) {
 		PreparedStatement pst = null;
         try {
             pst = sqlite.prepare(
@@ -138,13 +140,13 @@ public class SqliDataSource implements DataSource{
             		+columnRented+"=?,"//5
             		+columnExpire+"=?"//6
             		+" WHERE "+columnLocation+"=?");//7
-            pst.setString(1, sign.getProprietario());
-            pst.setInt(2, sign.getDurata());
-            pst.setString(3, sign.getCartello().toString());
-            pst.setInt(4, sign.getPrezzo());
-            pst.setBoolean(5, sign.isInuso());
+            pst.setString(1, sign.getOwner());
+            pst.setInt(2, sign.getDuration());
+            pst.setString(3, sign.getSign().toString());
+            pst.setInt(4, sign.getPrice());
+            pst.setBoolean(5, sign.isRented());
             pst.setLong(6, sign.getScadenza());
-            pst.setString(7, sign.getCartello().toString());
+            pst.setString(7, sign.getSign().toString());
             pst.executeUpdate();
             System.out.println("source: UPDATE SU DB CON SUCCESSO!!!");
         } catch (SQLException ex) {
@@ -193,13 +195,13 @@ public class SqliDataSource implements DataSource{
     }
 
 	@Override
-	public boolean delete(Sign sign) {
+	public boolean delete(RSign sign) {
 		PreparedStatement pst = null;
         try {
             pst = sqlite.prepare(
             		"DELETE FROM "+tableName
             		+" WHERE "+columnLocation+"=?");//7
-            pst.setString(1, sign.getCartello().toString());
+            pst.setString(1, sign.getSign().toString());
             pst.executeUpdate();
             System.out.println("source: DELETE DAL DB CON SUCCESSO!!!");
         } catch (SQLException ex) {

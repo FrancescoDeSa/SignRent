@@ -1,5 +1,7 @@
 package com.github.FrancescoDeSa;
 
+import java.util.List;
+
 import org.bukkit.configuration.file.FileConfiguration;
 
 public class Settings{
@@ -9,9 +11,11 @@ public class Settings{
 	//database
     public String getDatabase, getTableName, getColumnName, getColumnLocation, getColumnDuration,
     				getColumnPrice, getColumnRented, getColumnExpire;
+    
+    public List<String> getSignLines, getSignRLines, getSignLLines;
     //signs
     public String getSignTag;
-    public int getMinPrice, getMaxPrice, getMinDays, getMaxDays, getRenewDays;
+    public int getMinPrice, getMaxPrice, getMinDays, getMaxDays, getMaxLate, getRenewDays;
     
     //tools
     public int getRentToolId, getRenewToolId;
@@ -34,7 +38,12 @@ public class Settings{
 		this.getMaxPrice = config.getInt("sign.maxprice");
 		this.getMinDays = config.getInt("sign.mindays");
 		this.getMaxDays = config.getInt("sign.maxdays");
+		this.getMaxLate = config.getInt("sign.maxlate");
 		this.getRenewDays = config.getInt("sign.renewdays");
+		this.getSignLines = config.getStringList("sign.line.available");
+		this.getSignRLines = config.getStringList("sign.line.rented");
+		this.getSignLLines = config.getStringList("sign.line.late");
+
 		
 		this.getRentToolId = config.getInt("tools.rent.id");
 		this.getRenewToolId = config.getInt("tools.renew.id");

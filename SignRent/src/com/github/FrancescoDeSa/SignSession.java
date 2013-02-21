@@ -4,16 +4,16 @@ import java.util.ArrayList;
 
 public class SignSession {
 	
-	public SignSession(ArrayList<Sign> signs, DataSource source){
+	public SignSession(ArrayList<RSign> signs, DataSource source){
 		this.signs = signs;
 		this.source = source;
 	}
-	public Sign getRegistered(Sign dummy) {
+	public RSign getRegistered(RSign dummy) {
 		if(signs.isEmpty()){
 			System.out.println("session: NESSUN CARTELLO NELLA SESSIONE! (getreg)");
 			return null;
 		}
-		for(Sign sign : signs){
+		for(RSign sign : signs){
 			if(dummy.sameBlock(sign)){
 				System.out.println("session: CARTELLO TROVATO (getreg)!");
 				return sign;
@@ -23,7 +23,7 @@ public class SignSession {
 		return null;
 	}
 	
-	public boolean register(Sign sign) {
+	public boolean register(RSign sign) {
 		if(source.save(sign)){
 			signs.add(sign);
 			System.out.println("session: CARTELLO MEMORIZZATO SIA SU DB CHE SU SESSIONE!(reg)");
@@ -32,13 +32,13 @@ public class SignSession {
 		System.out.println("session: IMPOSSIBILE MEMORIZZARE SU DB!(reg)");
 		return false;
 	}
-	public boolean update(Sign what){
-		for(Sign sign : signs){
+	public boolean update(RSign what){
+		for(RSign sign : signs){
 			if(what.sameBlock(sign)){
 				System.out.println("CARTELLO TROVATO!");
 				if(source.update(sign)){
-					sign.setInuso(what.isInuso());
-					sign.setProprietario(what.getProprietario());
+					sign.setRented(what.isRented());
+					sign.setOwner(what.getOwner());
 					sign.setScadenza(what.getScadenza());
 					System.out.println("UPDATE CARTELLO RIUSCITO");
 					return true;
@@ -49,10 +49,11 @@ public class SignSession {
 		}
 		return false;
 	}
-	public boolean removeRegistered(Sign dummy) {
-		for(Sign sign : signs){
+	public boolean removeRegistered(RSign dummy) {
+		for(RSign sign : signs){
 			if(dummy.sameBlock(sign)){
 				if(source.delete(sign)){
+					sign.stopTask();
 					signs.remove(sign);
 					System.out.println("session: CARTELLO RIMOSSO SIA DAL DB CHE DALLA SESSIONE! (remreg)");
 					return true;
@@ -65,8 +66,13 @@ public class SignSession {
 		return false;
 	}
 	
+	public void startScheduler(){
+		for(RSign sign : signs){
+			SignScheduler.setTask(sign);
+		}
+	}
 	public boolean save(){
-		for(Sign s: signs){
+		for(RSign s: signs){
 			if(!source.update(s)){
 				System.out.println("IMPOSSIBILE SALVARE (AGGIORNARE) IL CARTELLO: "+s.toString());
 				return false;
@@ -75,6 +81,6 @@ public class SignSession {
 		}
 		return true;
 	}
-	private ArrayList<Sign> signs;
+	private ArrayList<RSign> signs;
 	private DataSource source;
 }

@@ -23,12 +23,29 @@ sign:
 #The max price allowed for a sign
    maxprice: 10000
 #The min amount of days a sign can be set to
-   mindays: 10
+   mindays: 1
 #The max amount of days a sign can be set to
    maxdays: 30
+#The max late in paying the sign before losing property
+   maxlate: 7
 #How many days must be left to be able to renew
    renewdays: 7
-
+   line:
+      available:
+         - SignRent
+         - Disponibile
+         - $d Giorni
+         - $p
+      rented:
+         - SignRent
+         - $n
+         - $e giorni
+         - $p/$d
+      late:
+         - SignRent
+         - $n
+         - $e giorni!
+         - $p/$d
 tools:
    rent:
 #the ID of the tool used to rent a sign
