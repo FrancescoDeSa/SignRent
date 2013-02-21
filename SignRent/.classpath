@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="C:/Users/Francesco/MinEclipse/bukkit-1.4.7-R1.1-20130214.060113-6.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
